@@ -1,0 +1,251 @@
+openapi: 3.0.3
+info:
+  title: Posts - OpenAPI 3.0
+  description: |-
+    This is a sample OpenAPI definition for a Post API. It includes operations related to creating, retrieving, updating, and deleting posts, as well as filtering posts by tags and updating the status of a post.
+  version: 1.0.0
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: post
+    description: Operations about posts
+
+paths:
+  /posts:
+    get:
+      summary: Get all posts
+      operationId: getPosts
+      tags:
+        - post
+      responses:
+        '200':
+          description: A list of posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PostRes'
+    post:
+      summary: Create a new post
+      tags:
+        - post
+      operationId: addPost
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostReq'
+      responses:
+        '201':
+          description: The created post
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostRes'
+  /posts/{postId}:
+    parameters:
+      - name: postId
+        in: path
+        required: true
+        description: ID of the post to be updated or deleted
+        schema:
+          type: integer
+          format: int64
+    get:
+      summary: Get a specific post by ID
+      tags:
+        - post
+      operationId: getPost
+      responses:
+        '200':
+          description: The requested post
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostRes'
+        '404':
+          description: Post not found
+    put:
+      summary: Update a post by ID
+      tags:
+        - post
+      operationId: updatePost
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          description: ID of the post to be updated
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostReq'
+      responses:
+        '200':
+          description: The updated post
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostRes'
+        '404':
+          description: Post not found
+    delete:
+      summary: Delete a post by ID
+      tags:
+        - post
+      operationId: deletePost
+      responses:
+        '204':
+          description: Post successfully deleted
+        '404':
+          description: Post not found
+
+  /posts/tag/{tag}:
+    parameters:
+      - name: tag
+        in: path
+        required: true
+        description: Tag to filter posts
+        schema:
+          type: string
+    get:
+      summary: Get posts by tag
+      tags:
+        - post
+      operationId: getPostsByTag
+      responses:
+        '200':
+          description: A list of posts filtered by tag
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PostRes'
+        '404':
+          description: No posts found for the given tag
+
+  /posts/{postId}/status:
+    parameters:
+      - name: postId
+        in: path
+        required: true
+        description: ID of the post to update status
+        schema:
+          type: integer
+          format: int64
+    patch:
+      summary: Update status of a post by ID
+      tags:
+        - post
+      operationId: updatePostStatus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatusUpdate'
+        description: The new status of the post
+      responses:
+        '200':
+          description: The updated post with new status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostRes'
+        '404':
+          description: Post not found
+
+components:
+  schemas:
+    PostRes:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+          format: int64
+          description: Unique identifier for the post.
+        title:
+          type: string
+          example: Spring Boot Tutorial
+          description: The title of the post.
+        author:
+          type: string
+          example: Spring Docs
+          description: The author of the post.
+        createdAt:
+          type: string
+          example: 2023-12-10T15:30:00.123456789+03:00
+          format: date-time
+          description: The timestamp when the post was created.
+        image:
+          type: string
+          example: springbootimagefullhd.jpg
+          description: The URL or path to the image attached to the post.
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        tags:
+          type: array
+          items:
+            type: string
+            example: spring boot
+          description: List of tags associated with the post.
+      required:
+        - id
+        - title
+        - author
+        - createdAt
+        - image
+        - status
+        - tags
+
+    PostReq:
+      type: object
+      properties:
+        title:
+          type: string
+          example: Spring Boot Tutorial
+          description: The title of the post.
+        author:
+          type: string
+          example: Spring Docs
+          description: The author of the post.
+        image:
+          type: string
+          example: springbootimagefullhd.jpg
+          description: The URL or path to the image attached to the post.
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        tags:
+          type: array
+          items:
+            type: string
+            example: spring boot
+          description: List of tags associated with the post.
+      required:
+        - title
+        - author
+        - image
+        - status
+        - tags
+    StatusEnum:
+      type: string
+      example: PUBLISHED
+      enum: [PUBLISHED, PENDING]
+    StatusUpdate:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+
+
